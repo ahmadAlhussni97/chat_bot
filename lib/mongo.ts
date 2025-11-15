@@ -1,12 +1,20 @@
-import { MongoClient } from "mongodb";
+import mongoose from "mongoose";
 
-const uri = process.env.MONGODB_URI as string;
+const MONGO_URI = process.env.MONGODB_URI || "mongodb://localhost:27017/local_ai_chat";
 
-if (!uri) {
-  throw new Error("❌ MONGODB_URI is not defined in .env.local");
+let cached = globalThis._mongo as any;
+
+if (!cached) {
+  cached = globalThis._mongo = { conn: null, promise: null };
 }
 
-const client = new MongoClient(uri);
-const clientPromise = client.connect();
+export async function connectMongo() {
+  if (cached.conn) return cached.conn;
 
-export default clientPromise;
+  if (!cached.promise) {
+    cached.promise = mongoose.connect(MONGO_URI).then((mongoose) => mongoose);
+  }
+
+  cached.conn = await cached.promise;
+  return cached.conn;
+}
