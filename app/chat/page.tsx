@@ -40,6 +40,7 @@ export default function ChatPage() {
         <div className="flex flex-col h-screen max-w-6xl p-2 mx-auto">
 
             <div className="p-4 rounded-lg bg-[#004a9e] text-white mb-4">
+
                 <h1 className="text-2xl font-bold">Chat App</h1>
             </div>
 
@@ -49,14 +50,29 @@ export default function ChatPage() {
                 {messages.map((msg, i) => (
                     <div
                         key={i}
-                        className={`p-3 rounded-xl text-[18px] w-fit max-w-[80%] break-words ${msg.role === "user"
-                            ? "bg-gray-100 text-black ml-auto"
-                            : "bg-[#0060d1] text-white"
+                        className={`flex items-start gap-2 mb-2 ${msg.role === "user" ? "justify-end" : "justify-start"
                             }`}
                     >
-                        {msg.content}
+                        {/* Avatar for non-user messages */}
+                        {msg.role !== "user" && (
+                            <img
+                                src="/chatbot.png" // replace with your image path
+                                alt="assistant"
+                                className="w-8 h-8 rounded-full object-cover"
+                            />
+                        )}
+
+                        <div
+                            className={`p-3 rounded-xl text-[18px] w-fit max-w-[80%] break-words ${msg.role === "user"
+                                    ? "bg-gray-100 text-black"
+                                    : "bg-[#0060d1] text-white"
+                                }`}
+                        >
+                            {msg.content}
+                        </div>
                     </div>
                 ))}
+
 
                 <div ref={bottomRef} />
             </div>
@@ -98,6 +114,6 @@ export default function ChatPage() {
             </div>
 
 
-        </div>
+        </div >
     );
 }
