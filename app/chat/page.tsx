@@ -23,18 +23,46 @@ export default function ChatPage() {
         const userMessage: Message = { role: "user", content: input };
         setMessages((prev) => [...prev, userMessage]);
 
+        const prompt = input;
         setInput("");
 
-        // Simulate AI response for now
-        const assistantMessage: Message = {
-            role: "assistant",
-            content: "This is a sample AI response. I can connect to API next.",
-        };
+        // Create placeholder assistant message
+        let assistantMsg: Message = { role: "assistant", content: "" };
+        setMessages((prev) => [...prev, assistantMsg]);
 
-        setTimeout(() => {
-            setMessages((prev) => [...prev, assistantMessage]);
-        }, 600);
+        const response = await fetch("/api/chat/stream", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                userId: "69199e826038bf3e62818830",
+                sessionId: "69199e826038bf3e62818834",
+                prompt,
+            }),
+        });
+
+        const reader = response.body?.getReader();
+        const decoder = new TextDecoder();
+        if (!reader) return;
+
+        while (true) {
+            const { value, done } = await reader.read();
+            if (done) break;
+
+            const text = decoder.decode(value, { stream: true });
+
+            assistantMsg = {
+                role: "assistant",
+                content: assistantMsg.content + text,
+            };
+
+            setMessages((prev) => {
+                const arr = [...prev];
+                arr[arr.length - 1] = assistantMsg;
+                return arr;
+            });
+        }
     };
+
 
     return (
         <div className="flex flex-col h-screen max-w-6xl p-2 mx-auto">
@@ -64,15 +92,15 @@ export default function ChatPage() {
 
                         <div
                             className={`p-3 rounded-xl text-[18px] w-fit max-w-[80%] break-words ${msg.role === "user"
-                                    ? "bg-gray-100 text-black"
-                                    : "bg-[#0060d1] text-white"
+                                ? "bg-gray-100 text-black"
+                                : "bg-[#0060d1] text-white"
                                 }`}
                         >
                             {msg.content}
                         </div>
                     </div>
                 ))}
-                
+
                 <div ref={bottomRef} />
             </div>
 
