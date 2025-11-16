@@ -1,8 +1,8 @@
-import { connectMongo } from "../lib/mongo";
-import { User } from "../models/User";
-import { Session } from "../models/Session";
-import { Message } from "../models/Message";
-import { Suggestion } from "../models/Suggestion";
+import { connectMongo } from "../lib/mongo.ts";
+import { User } from "../models/User.ts";
+import { Session } from "../models/Session.ts";
+import { Message } from "../models/Message.ts";
+import { Suggestion } from "../models/Suggestion.ts";
 
 async function seed() {
   await connectMongo();
@@ -53,7 +53,7 @@ async function seed() {
     }
   }
 
-  console.log("🎉 Seed completed!");
+  console.log("Seed completed!");
   process.exit(0);
 }
 

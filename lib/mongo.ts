@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const MONGO_URI = process.env.MONGODB_URI || "mongodb://localhost:27017/local_ai_chat";
+const MONGO_URI = process.env.MONGO_URI || "mongodb://localhost:27017/local_ai_chat";
 
 let cached = globalThis._mongo as any;
 
