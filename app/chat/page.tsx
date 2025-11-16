@@ -13,7 +13,10 @@ const MOCK_SESSION_ID = "69199e826038bf3e62818834";
 export default function ChatPage() {
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState("");
-    const [streaming, setStreaming] = useState(false); 
+    const [streaming, setStreaming] = useState(false);
+    const [suggestions, setSuggestions] = useState<{ _id: string; text: string }[]>([]);
+    const [ratings, setRatings] = useState<{ [key: number]: { value: number | null; color: string | null } }>({});
+    const [showScoreFor, setShowScoreFor] = useState<{ index: number | null; color: string | null }>({ index: null, color: null });
     const bottomRef = useRef<HTMLDivElement | null>(null);
 
     // Scroll to bottom when messages change
@@ -21,17 +24,19 @@ export default function ChatPage() {
         bottomRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
 
-    const sendMessage = async () => {
-        if (!input.trim() || streaming) return; // prevent sending while streaming,if input is empty
+    const sendMessage = async (text?: string) => {
+        const prompt = text ?? input; // allow sending from suggestion
+        if (!prompt.trim() || streaming) return;
 
-        const userMessage: Message = { role: "user", content: input };
+        // Clear suggestions before sending next
+        setSuggestions([]);
+
+        const userMessage: Message = { role: "user", content: prompt };
         setMessages((prev) => [...prev, userMessage]);
 
-        const prompt = input;
-        setInput("");
-        setStreaming(true); // mark streaming as active
+        if (!text) setInput(""); // clear input only if typed, not suggestion
+        setStreaming(true);
 
-        // Create placeholder assistant message
         let assistantMsg: Message = { role: "assistant", content: "" };
         setMessages((prev) => [...prev, assistantMsg]);
 
@@ -49,19 +54,20 @@ export default function ChatPage() {
         const decoder = new TextDecoder();
         if (!reader) return;
 
+        let assistantText = "";
+
         while (true) {
             const { value, done } = await reader.read();
             if (done) break;
 
-            let text = decoder.decode(value, { stream: true });
-            text = text.replace(/^data:\s*/gm, ""); // remove "data: "
-            text = text.replace(/\[DONE\]/g, "");   // remove "[DONE]"
-            if (!text) continue;
+            let chunk = decoder.decode(value, { stream: true });
+            chunk = chunk.replace(/^data:\s*/gm, "");
+            chunk = chunk.replace(/\[DONE\]/g, "");
+            if (!chunk) continue;
 
-            assistantMsg = {
-                role: "assistant",
-                content: assistantMsg.content + text,
-            };
+            assistantText += chunk;
+
+            assistantMsg = { role: "assistant", content: assistantText };
 
             setMessages((prev) => {
                 const arr = [...prev];
@@ -70,8 +76,48 @@ export default function ChatPage() {
             });
         }
 
-        setStreaming(false); // mark streaming as finished
+        // Generate 3 mock suggestions for follow-up
+        setSuggestions([
+            { _id: "67344abc1", text: "Could you explain that in a bit more detail so I can better understand?" },
+            { _id: "67344abc2", text: "Can you provide a real-life example to clarify your point?" },
+            { _id: "67344abc3", text: "What specific part would you like me to focus on or break down further?" }
+        ]);
+
+
+        setStreaming(false);
     };
+
+
+    const rateSuggestion = async (index: number, rating: number) => {
+        const suggestionId = suggestions[index]._id;
+
+        // store color from showScoreFor before clearing it
+        const ratingColor = showScoreFor.color === "green" ? "green" : "red";
+
+        const previousRating = ratings[index];
+
+        // Optimistic UI + store color
+        setRatings((prev) => ({ ...prev, [index]: { value: rating, color: ratingColor } }));
+        setShowScoreFor({ index: null, color: null });
+
+        try {
+            const res = await fetch(`/api/suggestions/${suggestionId}/rank`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ rank: rating }),
+            });
+
+            if (!res.ok) throw new Error("Failed to save rating");
+
+        } catch (err) {
+            console.error(err);
+
+            // rollback
+            setRatings((prev) => ({ ...prev, [index]: previousRating }));
+            alert("Failed to submit rating.");
+        }
+    };
+
 
     return (
         <div className="flex flex-col h-screen max-w-6xl p-2 mx-auto">
@@ -102,6 +148,70 @@ export default function ChatPage() {
                         </div>
                     </div>
                 ))}
+
+                {/* FOLLOW-UP SUGGESTIONS */}
+                {suggestions.length > 0 && (
+                    <div className="flex flex-col gap-1 mt-4">
+                        {suggestions.map((sugg, i) => (
+                            <div
+                                key={i}
+                                className="flex items-center justify-between gap-4 bg-white border rounded-xl p-3 shadow-sm"
+                            >
+                                {/* Suggestion Button */}
+                                <button
+                                    onClick={() => sendMessage(sugg.text)}
+                                    className="flex-1 bg-gray-100 px-4 py-2 rounded-lg hover:bg-blue-100 transition text-black font-medium text-sm text-left"
+                                >
+                                    {sugg.text}
+                                </button>
+
+                                {/* Rating Section */}
+                                {ratings[i] ? (
+                                    <div
+                                        className={`text-sm font-semibold whitespace-nowrap ${ratings[i].color === "green" ? "text-green-600" : "text-red-600"}`}
+                                    >
+                                        Rated: {ratings[i].value}
+                                    </div>
+                                ) : (
+
+                                    <div className="flex items-center gap-3 whitespace-nowrap">
+
+                                        <button
+                                            onClick={() => setShowScoreFor({ index: i, color: "green" })}
+                                            className="text-green-600 hover:text-green-800 text-xl"
+                                        >
+                                            👍
+                                        </button>
+
+                                        <button
+                                            onClick={() => setShowScoreFor({ index: i, color: "red" })}
+                                            className="text-red-600 hover:text-red-800 text-xl"
+                                        >
+                                            👎
+                                        </button>
+
+                                        {/* Score buttons 1–3 appear inline */}
+                                        {showScoreFor.index === i && (
+                                            <div className="flex gap-2">
+                                                {[1, 2, 3].map((score) => (
+                                                    <button
+                                                        key={score}
+                                                        onClick={() => rateSuggestion(i, score)}
+                                                        className={`px-2 py-1 ${showScoreFor.color === "green" ? "bg-green-500 text-white hover:bg-green-600" : "bg-red-500 text-white hover:bg-red-600"} rounded-lg transition text-xs`}
+                                                    >
+                                                        {score}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                )}
+
+
                 <div ref={bottomRef} />
             </div>
 
@@ -115,13 +225,13 @@ export default function ChatPage() {
                         if (e.key === "Enter") sendMessage();
                     }}
                     placeholder="Type your message..."
-                    disabled={streaming} // disable input while streaming
+                    disabled={streaming}
                 />
                 <button
-                    onClick={sendMessage}
+                    onClick={() => sendMessage()}
                     className={`absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-lg text-white transition ${streaming ? "bg-gray-400 cursor-not-allowed" : "bg-[#0060d1] hover:bg-[#004a9e]"
                         }`}
-                    disabled={streaming} // disable button while streaming
+                    disabled={streaming}
                 >
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
