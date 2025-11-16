@@ -8,7 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "seed": "ts-node-esm scripts/seed.ts"
+    "seed": "node --no-deprecation -r ts-node/esm scripts/seed.ts"
   },
   "dependencies": {
     "mongoose": "^8.19.4",

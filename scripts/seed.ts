@@ -14,9 +14,9 @@ async function seed() {
   ]);
 
   const users = await User.create([{ name: "user_1" }, { name: "user_2" }]);
-
+ 
   for (const user of users) {
-    for (let s = 0; s < 5; s++) {
+    for (let s = 0; s < 6; s++) {
       const session = await Session.create({
         userId: user._id,
         model: "mock-model",
