@@ -7,6 +7,9 @@ type Message = {
     content: string;
 };
 
+const MOCK_USER_ID = "69199e826038bf3e62818830";
+const MOCK_SESSION_ID = "69199e826038bf3e62818834";
+
 export default function ChatPage() {
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState("");
@@ -44,12 +47,15 @@ export default function ChatPage() {
         const decoder = new TextDecoder();
         if (!reader) return;
 
-        while (true) {
+        while (true) {  
             const { value, done } = await reader.read();
             if (done) break;
 
-            const text = decoder.decode(value, { stream: true });
-
+            let text = decoder.decode(value, { stream: true });
+            text = text.replace(/^data:\s*/gm, ""); // removed "data: " prefix
+            text = text.replace(/\[DONE\]/g, "");    // removed [DONE] tokens   
+            if (!text) continue;
+             
             assistantMsg = {
                 role: "assistant",
                 content: assistantMsg.content + text,

@@ -4,7 +4,7 @@ const MessageSchema = new mongoose.Schema({
   sessionId: { type: mongoose.Schema.Types.ObjectId, ref: "Session", required: true },
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   role: { type: String, enum: ["user", "assistant"], required: true },
-  text: { type: String, required: true },
+  text: { type: String, required: false },
   wordCount: { type: Number, required: true },
   tokenEst: { type: Number, required: true },
   timings: {
