@@ -37,8 +37,8 @@ export default function ChatPage() {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                userId: "69199e826038bf3e62818830",
-                sessionId: "69199e826038bf3e62818834",
+                userId: MOCK_USER_ID,
+                sessionId: MOCK_SESSION_ID,
                 prompt,
             }),
         });

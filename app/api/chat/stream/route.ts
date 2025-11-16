@@ -44,14 +44,17 @@ export async function POST(req: NextRequest) {
 
             // Keep a local variable for accumulated text
             let fullText = "";
-
+                
+            // small delay to simulate streaming
+            await new Promise((r) => setTimeout(r, 300));
+            
             for (const token of tokens) {
                 fullText += token + " "; // accumulate
 
                 // Update MongoDB with full text, wordCount, and tokenEst
                 await Message.findByIdAndUpdate(assistantMessage._id, {
                     $set: { text: fullText },
-                    $inc: { wordCount: 1, tokenEst: Math.ceil(1.33)},
+                    $inc: { wordCount: 1, tokenEst: Math.ceil(1.33) },
                 });
 
                 // Stream this token to the client
