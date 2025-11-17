@@ -7,7 +7,6 @@ type Message = {
     content: string;
 };
 
-const MOCK_USER_ID = "69199e826038bf3e62818830";
 const MOCK_SESSION_ID = "69199e826038bf3e62818834";
 
 const user_1 = "69199e826038bf3e62818830";
