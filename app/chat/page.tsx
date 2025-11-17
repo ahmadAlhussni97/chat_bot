@@ -158,11 +158,12 @@ export default function ChatPage() {
             </div>
 
             <div className="flex-1 flex flex-col">
-                <div className="p-4 bg-[#004a9e] text-white mb-4">
+                {/* TOP BAR */}
+                <div className="p-4 bg-[#004a9e] text-white">
                     <h1 className="text-2xl font-bold">Chat App</h1>
                 </div>
 
-                <div className="mx-[10%]">
+                <div className="flex flex-col flex-1 mx-[10%]">
 
                     {/* MESSAGE BOX */}
                     <div className="flex-1 overflow-y-auto p-4 rounded-xl space-y-3">
@@ -255,9 +256,21 @@ export default function ChatPage() {
                     </div>
 
                     {/* INPUT BOX */}
-                    <div className="relative mt-4 text-[18px]">
+                    <div className="relative m-4 text-[18px]">
                         <input
-                            className="w-full p-3 pr-16 border rounded-xl text-black"
+                            className="
+                                    w-full p-4 pr-16 
+                                    bg-white 
+                                    border border-gray-300 
+                                    rounded-2xl 
+                                    shadow-sm 
+                                    focus:outline-none 
+                                    focus:ring-2 
+                                    focus:ring-[#0060d1] 
+                                    focus:border-[#0060d1]
+                                    transition
+                                    text-black
+                                "
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
                             onKeyDown={(e) => {
@@ -266,10 +279,21 @@ export default function ChatPage() {
                             placeholder="Type your message..."
                             disabled={streaming}
                         />
+
                         <button
                             onClick={() => sendMessage()}
-                            className={`absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-lg text-white transition ${streaming ? "bg-gray-400 cursor-not-allowed" : "bg-[#0060d1] hover:bg-[#004a9e]"
-                                }`}
+                            className={`
+            absolute right-3 top-1/2 -translate-y-1/2 
+            p-3 
+            rounded-xl 
+            text-white 
+            shadow-md
+            transition 
+            ${streaming
+                                    ? "bg-gray-400 cursor-not-allowed"
+                                    : "bg-[#0060d1] hover:bg-[#004a9e] active:scale-95"
+                                }
+        `}
                             disabled={streaming}
                         >
                             <svg
@@ -278,12 +302,13 @@ export default function ChatPage() {
                                 viewBox="0 0 24 24"
                                 strokeWidth="2"
                                 stroke="currentColor"
-                                className="w-7 h-7"
+                                className="w-6 h-6"
                             >
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 12L19 6L15 18L11.5 13L5 12Z" />
                             </svg>
                         </button>
                     </div>
+
 
                 </div>
 
