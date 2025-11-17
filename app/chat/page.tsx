@@ -133,152 +133,92 @@ export default function ChatPage() {
     return (
         <div className="flex h-screen bg-white">
 
+            {/* Sidebar */}
             <div className="w-1/4 bg-gray-100 border-r p-4 overflow-y-auto">
                 <h2 className="text-xl text-black font-bold mb-4">Users</h2>
 
-                {/* Later replace with real user list */}
+                {/* Users List */}
                 <div>
-                    {/* Collapse Header */}
                     <button
                         onClick={() => setOpen(!open)}
                         className="w-full flex items-center justify-between p-3 text-black border font-semibold rounded-lg"
                     >
-                        <span>Users</span>
+                        <span>User Conversations</span>
                         <span>{open ? "▲" : "▼"}</span>
                     </button>
 
-                    {/* Collapsible Content */}
-                    <div
-                        className={`
-                    overflow-hidden transition-all duration-300
-                    ${open ? "max-h-40 mt-3" : "max-h-0"}
-                `}
-                    >
+                    <div className={`overflow-hidden transition-all duration-300 ${open ? "max-h-40 mt-3" : "max-h-0"}`}>
                         <div className="space-y-3">
                             <button
                                 onClick={() => setSelectedUser(user_1)}
-                                className={`w-full flex p-3 rounded-lg border text-left transition
-                                    ${selectedUser === user_1
-                                        ? "bg-[#004a9e] text-white"
-                                        : "bg-white text-black hover:bg-[#004a9e] hover:text-white"
-                                    }`}
+                                className={`w-full flex p-3 rounded-lg border text-left transition ${selectedUser === user_1 ? "bg-[#004a9e] text-white" : "bg-white text-black hover:bg-[#004a9e] hover:text-white"}`}
                             >
-                                <img
-                                    src="/user_1.png" // replace with actual path or URL
-                                    alt="User 1"
-                                    className="w-6 h-6 rounded-full"
-                                />
+                                <img src="/user_1.png" alt="User 1" className="w-6 h-6 rounded-full mr-2" />
                                 user_1
                             </button>
 
                             <button
                                 onClick={() => setSelectedUser(user_2)}
-                                className={`w-full flex p-3 rounded-lg border text-left transition
-                                    ${selectedUser === user_2
-                                        ? "bg-[#004a9e] text-white"
-                                        : "bg-white text-black hover:bg-[#004a9e] hover:text-white"
-                                    }`}
+                                className={`w-full flex p-3 rounded-lg border text-left transition ${selectedUser === user_2 ? "bg-[#004a9e] text-white" : "bg-white text-black hover:bg-[#004a9e] hover:text-white"}`}
                             >
-                                <img
-                                    src="/user_2.svg" // replace with actual path or URL
-                                    alt="User 2"
-                                    className="w-6 h-6 rounded-full"
-                                />
+                                <img src="/user_2.svg" alt="User 2" className="w-6 h-6 rounded-full mr-2" />
                                 user_2
                             </button>
                         </div>
-
                     </div>
                 </div>
             </div>
 
-            <div className="flex-1 flex flex-col overflow-y-auto">
-                {/* TOP BAR */}
-                <div className="p-4 bg-[#004a9e] text-white">
+            {/* Chat Panel */}
+            <div className="flex-1 flex flex-col relative">
+                {/* Top Bar */}
+                <div className="p-4 bg-[#004a9e] text-white sticky top-0 z-10">
                     <h1 className="text-2xl font-bold">Chat App</h1>
                 </div>
-
-                <div className="flex flex-col flex-1 mx-[10%]">
-                    {/* MESSAGE BOX */}
-                    <div className="flex-1  p-4 rounded-xl space-y-3">
-                        {(messagesMap[selectedUser] || []).map((msg, i) => (
-                            <div
-                                key={i}
-                                className={`flex items-start gap-2 mb-2 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-                            >
-                                {msg.role !== "user" && (
-                                    <img
-                                        src="/chatbot.png"
-                                        alt="assistant"
-                                        className="w-8 h-8 rounded-full object-cover"
-                                    />
-                                )}
-                                <div
-                                    className={`p-3 rounded-xl text-[18px] w-fit max-w-[80%] break-words ${msg.role === "user" ? "bg-gray-100 text-black" : "bg-[#0060d1] text-white"
-                                        }`}
-                                >
-                                    {msg.content}
-                                </div>
+    
+                {/* Messages Area */}
+                <div className="flex-1 overflow-y-auto py-[2%] px-[10%] space-y-3">
+                    {(messagesMap[selectedUser] || []).map((msg, i) => (
+                        <div
+                            key={i}
+                            className={`flex items-start gap-2 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+                        >
+                            {msg.role !== "user" && (
+                                <img src="/chatbot.png" alt="assistant" className="w-8 h-8 rounded-full object-cover" />
+                            )}
+                            <div className={`p-3 rounded-xl text-[18px] w-fit max-w-[80%] break-words ${msg.role === "user" ? "bg-gray-100 text-black" : "bg-[#0060d1] text-white"}`}>
+                                {msg.content}
                             </div>
-                        ))}
-                        <div ref={bottomRef} />
-                    </div>
+                        </div>
+                    ))}
+                    <div ref={bottomRef} />
+                </div>
 
-
-                    {/* INPUT BOX */}
-                    <div className="relative m-4 text-[18px]">
-                        <input
-                            className="
-                                    w-full p-4 pr-16 
-                                    bg-white 
-                                    border border-gray-300 
-                                    rounded-2xl 
-                                    shadow-sm 
-                                    focus:outline-none 
-                                    focus:ring-2 
-                                    focus:ring-[#0060d1] 
-                                    focus:border-[#0060d1]
-                                    transition
-                                    text-black
-                                "
+                {/* Input Box */}
+                <div className="py-[2%] bg-white sticky z-10 px-[10%]">
+                    <div className="relative">
+                        <textarea
+                            className="w-full pl-4 pt-4 pb-4  pr-20 border border-gray-300 rounded-2xl shadow-sm focus:outline-none focus:ring-2 focus:ring-[#0060d1] focus:border-[#0060d1] text-black resize-none"
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
-                            onKeyDown={(e) => {
-                                if (e.key === "Enter") sendMessage();
-                            }}
+                            onKeyDown={(e) => { if (e.key === "Enter") sendMessage(); }}
                             placeholder="Type your message..."
                             disabled={streaming}
                         />
-
                         <button
                             onClick={() => sendMessage()}
-                            className={`
-                                    absolute right-3 top-1/2 -translate-y-1/2 
-                                    p-3 
-                                    rounded-xl 
-                                    text-white 
-                                    shadow-md
-                                    transition 
-                                    ${streaming
-                                    ? "bg-gray-400 cursor-not-allowed"
-                                    : "bg-[#0060d1] hover:bg-[#004a9e] active:scale-95"}
-                            `}
                             disabled={streaming}
+                            className={`absolute right-3 top-1/2 -translate-y-1/2 p-3 rounded-xl text-white shadow-md transition ${streaming ? "bg-gray-400 cursor-not-allowed" : "bg-[#0060d1] hover:bg-[#004a9e] active:scale-95"}`}
                         >
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                strokeWidth="2"
-                                stroke="currentColor"
-                                className="w-6 h-6"
-                            >
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" className="w-6 h-6">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 12L19 6L15 18L11.5 13L5 12Z" />
                             </svg>
                         </button>
                     </div>
                 </div>
+
             </div>
         </div>
+
     );
 }
