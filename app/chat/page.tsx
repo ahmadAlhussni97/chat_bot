@@ -18,6 +18,7 @@ export default function ChatPage() {
     const [ratings, setRatings] = useState<{ [key: number]: { value: number | null; color: string | null } }>({});
     const [showScoreFor, setShowScoreFor] = useState<{ index: number | null; color: string | null }>({ index: null, color: null });
     const bottomRef = useRef<HTMLDivElement | null>(null);
+    const [open, setOpen] = useState(true);
 
     // Scroll to bottom when messages change
     useEffect(() => {
@@ -120,130 +121,173 @@ export default function ChatPage() {
 
 
     return (
-        <div className="flex flex-col h-screen max-w-6xl p-2 mx-auto">
-            <div className="p-4 rounded-lg bg-[#004a9e] text-white mb-4">
-                <h1 className="text-2xl font-bold">Chat App</h1>
-            </div>
+        <div className="flex h-screen  bg-white">
 
-            {/* MESSAGE BOX */}
-            <div className="flex-1 overflow-y-auto p-4 rounded-xl space-y-3">
-                {messages.map((msg, i) => (
-                    <div
-                        key={i}
-                        className={`flex items-start gap-2 mb-2 ${msg.role === "user" ? "justify-end" : "justify-start"
-                            }`}
+            <div className="w-1/4 bg-gray-100 border-r p-4 overflow-y-auto">
+                <h2 className="text-xl text-black font-bold mb-4">Users</h2>
+
+                {/* Later replace with real user list */}
+                <div>
+                    {/* Collapse Header */}
+                    <button
+                        onClick={() => setOpen(!open)}
+                        className="w-full flex items-center justify-between p-3 bg-[#004a9e] text-white font-semibold rounded-lg"
                     >
-                        {msg.role !== "user" && (
-                            <img
-                                src="/chatbot.png"
-                                alt="assistant"
-                                className="w-8 h-8 rounded-full object-cover"
-                            />
-                        )}
-                        <div
-                            className={`p-3 rounded-xl text-[18px] w-fit max-w-[80%] break-words ${msg.role === "user" ? "bg-gray-100 text-black" : "bg-[#0060d1] text-white"
-                                }`}
-                        >
-                            {msg.content}
+                        <span>Users</span>
+                        <span>{open ? "▲" : "▼"}</span>
+                    </button>
+
+                    {/* Collapsible Content */}
+                    <div
+                        className={`
+                    overflow-hidden transition-all duration-300
+                    ${open ? "max-h-40 mt-3" : "max-h-0"}
+                `}
+                    >
+                        <div className="space-y-3">
+                            <button className="w-full text-black p-2 bg-white rounded-lg hover:bg-[#004a9e] hover:text-white border text-left">
+                                user_1
+                            </button>
+
+                            <button className="w-full text-black p-2 bg-white rounded-lg hover:bg-[#004a9e] hover:text-white border text-left">
+                                user_2
+                            </button>
                         </div>
                     </div>
-                ))}
+                </div>
+            </div>
 
-                {/* FOLLOW-UP SUGGESTIONS */}
-                {suggestions.length > 0 && (
-                    <div className="flex flex-col gap-1 mt-4">
-                        {suggestions.map((sugg, i) => (
+            <div className="flex-1 flex flex-col">
+                <div className="p-4 bg-[#004a9e] text-white mb-4">
+                    <h1 className="text-2xl font-bold">Chat App</h1>
+                </div>
+
+                <div className="mx-[10%]">
+
+                    {/* MESSAGE BOX */}
+                    <div className="flex-1 overflow-y-auto p-4 rounded-xl space-y-3">
+                        {messages.map((msg, i) => (
                             <div
                                 key={i}
-                                className="flex items-center justify-between gap-4 bg-white border rounded-xl p-3 shadow-sm"
+                                className={`flex items-start gap-2 mb-2 ${msg.role === "user" ? "justify-end" : "justify-start"
+                                    }`}
                             >
-                                {/* Suggestion Button */}
-                                <button
-                                    onClick={() => sendMessage(sugg.text)}
-                                    className="flex-1 bg-gray-100 px-4 py-2 rounded-lg hover:bg-blue-100 transition text-black font-medium text-sm text-left"
+                                {msg.role !== "user" && (
+                                    <img
+                                        src="/chatbot.png"
+                                        alt="assistant"
+                                        className="w-8 h-8 rounded-full object-cover"
+                                    />
+                                )}
+                                <div
+                                    className={`p-3 rounded-xl text-[18px] w-fit max-w-[80%] break-words ${msg.role === "user" ? "bg-gray-100 text-black" : "bg-[#0060d1] text-white"
+                                        }`}
                                 >
-                                    {sugg.text}
-                                </button>
+                                    {msg.content}
+                                </div>
+                            </div>
+                        ))}
 
-                                {/* Rating Section */}
-                                {ratings[i] ? (
+                        {/* FOLLOW-UP SUGGESTIONS */}
+                        {suggestions.length > 0 && (
+                            <div className="flex flex-col gap-1 mt-4">
+                                {suggestions.map((sugg, i) => (
                                     <div
-                                        className={`text-sm font-semibold whitespace-nowrap ${ratings[i].color === "green" ? "text-green-600" : "text-red-600"}`}
+                                        key={i}
+                                        className="flex items-center justify-between gap-4 bg-white border rounded-xl p-3 shadow-sm"
                                     >
-                                        Rated: {ratings[i].value}
-                                    </div>
-                                ) : (
-
-                                    <div className="flex items-center gap-3 whitespace-nowrap">
-
+                                        {/* Suggestion Button */}
                                         <button
-                                            onClick={() => setShowScoreFor({ index: i, color: "green" })}
-                                            className="text-green-600 hover:text-green-800 text-xl"
+                                            onClick={() => sendMessage(sugg.text)}
+                                            className="flex-1 bg-gray-100 px-4 py-2 rounded-lg hover:bg-blue-100 transition text-black font-medium text-sm text-left"
                                         >
-                                            👍
+                                            {sugg.text}
                                         </button>
 
-                                        <button
-                                            onClick={() => setShowScoreFor({ index: i, color: "red" })}
-                                            className="text-red-600 hover:text-red-800 text-xl"
-                                        >
-                                            👎
-                                        </button>
+                                        {/* Rating Section */}
+                                        {ratings[i] ? (
+                                            <div
+                                                className={`text-sm font-semibold whitespace-nowrap ${ratings[i].color === "green" ? "text-green-600" : "text-red-600"}`}
+                                            >
+                                                Rated: {ratings[i].value}
+                                            </div>
+                                        ) : (
 
-                                        {/* Score buttons 1–3 appear inline */}
-                                        {showScoreFor.index === i && (
-                                            <div className="flex gap-2">
-                                                {[1, 2, 3].map((score) => (
-                                                    <button
-                                                        key={score}
-                                                        onClick={() => rateSuggestion(i, score)}
-                                                        className={`px-2 py-1 ${showScoreFor.color === "green" ? "bg-green-500 text-white hover:bg-green-600" : "bg-red-500 text-white hover:bg-red-600"} rounded-lg transition text-xs`}
-                                                    >
-                                                        {score}
-                                                    </button>
-                                                ))}
+                                            <div className="flex items-center gap-3 whitespace-nowrap">
+
+                                                <button
+                                                    onClick={() => setShowScoreFor({ index: i, color: "green" })}
+                                                    className="text-green-600 hover:text-green-800 text-xl"
+                                                >
+                                                    👍
+                                                </button>
+
+                                                <button
+                                                    onClick={() => setShowScoreFor({ index: i, color: "red" })}
+                                                    className="text-red-600 hover:text-red-800 text-xl"
+                                                >
+                                                    👎
+                                                </button>
+
+                                                {/* Score buttons 1–3 appear inline */}
+                                                {showScoreFor.index === i && (
+                                                    <div className="flex gap-2">
+                                                        {[1, 2, 3].map((score) => (
+                                                            <button
+                                                                key={score}
+                                                                onClick={() => rateSuggestion(i, score)}
+                                                                className={`px-2 py-1 ${showScoreFor.color === "green" ? "bg-green-500 text-white hover:bg-green-600" : "bg-red-500 text-white hover:bg-red-600"} rounded-lg transition text-xs`}
+                                                            >
+                                                                {score}
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                )}
                                             </div>
                                         )}
                                     </div>
-                                )}
+                                ))}
                             </div>
-                        ))}
+                        )}
+
+
+                        <div ref={bottomRef} />
                     </div>
-                )}
+
+                    {/* INPUT BOX */}
+                    <div className="relative mt-4 text-[18px]">
+                        <input
+                            className="w-full p-3 pr-16 border rounded-xl text-black"
+                            value={input}
+                            onChange={(e) => setInput(e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === "Enter") sendMessage();
+                            }}
+                            placeholder="Type your message..."
+                            disabled={streaming}
+                        />
+                        <button
+                            onClick={() => sendMessage()}
+                            className={`absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-lg text-white transition ${streaming ? "bg-gray-400 cursor-not-allowed" : "bg-[#0060d1] hover:bg-[#004a9e]"
+                                }`}
+                            disabled={streaming}
+                        >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                strokeWidth="2"
+                                stroke="currentColor"
+                                className="w-7 h-7"
+                            >
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 12L19 6L15 18L11.5 13L5 12Z" />
+                            </svg>
+                        </button>
+                    </div>
+
+                </div>
 
 
-                <div ref={bottomRef} />
-            </div>
-
-            {/* INPUT BOX */}
-            <div className="relative mt-4 text-[18px]">
-                <input
-                    className="w-full p-3 pr-16 border rounded-xl text-black"
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    onKeyDown={(e) => {
-                        if (e.key === "Enter") sendMessage();
-                    }}
-                    placeholder="Type your message..."
-                    disabled={streaming}
-                />
-                <button
-                    onClick={() => sendMessage()}
-                    className={`absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-lg text-white transition ${streaming ? "bg-gray-400 cursor-not-allowed" : "bg-[#0060d1] hover:bg-[#004a9e]"
-                        }`}
-                    disabled={streaming}
-                >
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth="2"
-                        stroke="currentColor"
-                        className="w-7 h-7"
-                    >
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 12L19 6L15 18L11.5 13L5 12Z" />
-                    </svg>
-                </button>
             </div>
         </div>
     );
