@@ -175,7 +175,7 @@ export default function ChatPage() {
                 <div className="p-4 bg-[#004a9e] text-white sticky top-0 z-10">
                     <h1 className="text-2xl font-bold">Chat App</h1>
                 </div>
-    
+
                 {/* Messages Area */}
                 <div className="flex-1 overflow-y-auto py-[2%] px-[10%] space-y-3">
                     {(messagesMap[selectedUser] || []).map((msg, i) => (
@@ -186,13 +186,14 @@ export default function ChatPage() {
                             {msg.role !== "user" && (
                                 <img src="/chatbot.png" alt="assistant" className="w-8 h-8 rounded-full object-cover" />
                             )}
-                            <div className={`p-3 rounded-xl text-[18px] w-fit max-w-[80%] break-words ${msg.role === "user" ? "bg-gray-100 text-black" : "bg-[#0060d1] text-white"}`}>
+                            <div className={`p-3 rounded-xl text-[18px] w-fit max-w-[60%] break-words md:max-w-[50%] ${msg.role === "user" ? "bg-gray-100 text-black" : "bg-[#0060d1] text-white"}`}>
                                 {msg.content}
                             </div>
                         </div>
                     ))}
                     <div ref={bottomRef} />
                 </div>
+
 
                 {/* Input Box */}
                 <div className="py-[2%] bg-white sticky z-10 px-[10%]">
