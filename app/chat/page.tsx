@@ -10,6 +10,9 @@ type Message = {
 const MOCK_USER_ID = "69199e826038bf3e62818830";
 const MOCK_SESSION_ID = "69199e826038bf3e62818834";
 
+const user_1 = "69199e826038bf3e62818830";
+const user_2 = "6919dae66079e4b588a99ffc";
+
 export default function ChatPage() {
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState("");
@@ -19,6 +22,8 @@ export default function ChatPage() {
     const [showScoreFor, setShowScoreFor] = useState<{ index: number | null; color: string | null }>({ index: null, color: null });
     const bottomRef = useRef<HTMLDivElement | null>(null);
     const [open, setOpen] = useState(true);
+    const [selectedUser, setSelectedUser] = useState<string>(user_1); // default user_1
+
 
     // Scroll to bottom when messages change
     useEffect(() => {
@@ -121,7 +126,7 @@ export default function ChatPage() {
 
 
     return (
-        <div className="flex h-screen  bg-white">
+        <div className="flex h-screen bg-white">
 
             <div className="w-1/4 bg-gray-100 border-r p-4 overflow-y-auto">
                 <h2 className="text-xl text-black font-bold mb-4">Users</h2>
@@ -131,7 +136,7 @@ export default function ChatPage() {
                     {/* Collapse Header */}
                     <button
                         onClick={() => setOpen(!open)}
-                        className="w-full flex items-center justify-between p-3 bg-[#004a9e] text-white font-semibold rounded-lg"
+                        className="w-full flex items-center justify-between p-3 text-black border font-semibold rounded-lg"
                     >
                         <span>Users</span>
                         <span>{open ? "▲" : "▼"}</span>
@@ -145,14 +150,39 @@ export default function ChatPage() {
                 `}
                     >
                         <div className="space-y-3">
-                            <button className="w-full text-black p-2 bg-white rounded-lg hover:bg-[#004a9e] hover:text-white border text-left">
+                            <button
+                                onClick={() => setSelectedUser(user_1)}
+                                className={`w-full flex p-3 rounded-lg border text-left transition
+                                    ${selectedUser === user_1
+                                        ? "bg-[#004a9e] text-white"
+                                        : "bg-white text-black hover:bg-[#004a9e] hover:text-white"
+                                    }`}
+                            >
+                                <img
+                                    src="/user_1.png" // replace with actual path or URL
+                                    alt="User 1"
+                                    className="w-6 h-6 rounded-full"
+                                />
                                 user_1
                             </button>
 
-                            <button className="w-full text-black p-2 bg-white rounded-lg hover:bg-[#004a9e] hover:text-white border text-left">
+                            <button
+                                onClick={() => setSelectedUser(user_2)}
+                                className={`w-full flex p-3 rounded-lg border text-left transition
+                                    ${selectedUser === user_2
+                                        ? "bg-[#004a9e] text-white"
+                                        : "bg-white text-black hover:bg-[#004a9e] hover:text-white"
+                                    }`}
+                            >
+                                <img
+                                    src="/user_2.svg" // replace with actual path or URL
+                                    alt="User 2"
+                                    className="w-6 h-6 rounded-full"
+                                />
                                 user_2
                             </button>
                         </div>
+
                     </div>
                 </div>
             </div>
