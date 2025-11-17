@@ -313,17 +313,16 @@ export default function ChatPage() {
                         <button
                             onClick={() => sendMessage()}
                             className={`
-            absolute right-3 top-1/2 -translate-y-1/2 
-            p-3 
-            rounded-xl 
-            text-white 
-            shadow-md
-            transition 
-            ${streaming
+                                    absolute right-3 top-1/2 -translate-y-1/2 
+                                    p-3 
+                                    rounded-xl 
+                                    text-white 
+                                    shadow-md
+                                    transition 
+                                    ${streaming
                                     ? "bg-gray-400 cursor-not-allowed"
-                                    : "bg-[#0060d1] hover:bg-[#004a9e] active:scale-95"
-                                }
-        `}
+                                    : "bg-[#0060d1] hover:bg-[#004a9e] active:scale-95" }
+                            `}
                             disabled={streaming}
                         >
                             <svg
