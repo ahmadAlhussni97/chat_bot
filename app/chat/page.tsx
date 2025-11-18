@@ -8,6 +8,11 @@ type Message = {
 };
 
 const MOCK_SESSION_ID = "69199e826038bf3e62818834";
+const initialSuggestions = [
+    "That’s interesting! Can you share more about what you mean?",
+    "Walk me through your thought—what’s the tricky part?",
+    "Could you give me more context so I can help better?"
+];
 
 const user_1 = "69199e826038bf3e62818830";
 const user_2 = "6919dae66079e4b588a99ffc";
@@ -16,7 +21,13 @@ export default function ChatPage() {
 
     const [input, setInput] = useState("");
     const [streaming, setStreaming] = useState(false);
-    const [suggestions, setSuggestions] = useState<{ _id: string; text: string }[]>([]);
+    const [showSuggestions, setShowSuggestions] = useState(false);
+    const [suggestions, setSuggestions] = useState(
+        initialSuggestions.map((text, i) => ({
+            _id: String(i + 1),
+            text,
+        }))
+    );
     const [ratings, setRatings] = useState<{ [key: number]: { value: number | null; color: string | null } }>({});
     const [showScoreFor, setShowScoreFor] = useState<{ index: number | null; color: string | null }>({ index: null, color: null });
     const bottomRef = useRef<HTMLDivElement | null>(null);
@@ -28,7 +39,6 @@ export default function ChatPage() {
     const [selectedUser, setSelectedUser] = useState<string>(user_1);
 
 
-
     // Scroll to bottom when messages change
     useEffect(() => {
         bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -38,8 +48,8 @@ export default function ChatPage() {
         const prompt = text ?? input;
         if (!prompt.trim() || streaming) return;
 
-        setSuggestions([]);
         setInput("");
+        setShowSuggestions(false);
 
         const userMessage: Message = { role: "user", content: prompt };
 
@@ -94,9 +104,8 @@ export default function ChatPage() {
         }
 
         setStreaming(false);
+        setShowSuggestions(true);
     };
-
-
 
     const rateSuggestion = async (index: number, rating: number) => {
         const suggestionId = suggestions[index]._id;
@@ -190,6 +199,74 @@ export default function ChatPage() {
                             </div>
                         </div>
                     ))}
+
+                    {/* FOLLOW-UP SUGGESTIONS */}
+                    {showSuggestions && suggestions.length > 0 && (
+                        <div className="flex flex-col gap-1 mt-4">
+                            {suggestions.map((sugg, i) => (
+                                <div
+                                    key={i}
+                                    className="flex items-center justify-between gap-4 bg-white border rounded-xl p-3 shadow-sm"
+                                >
+                                    {/* Suggestion Button */}
+                                    <button
+                                        onClick={() => sendMessage(sugg.text)}
+                                        className="flex-1 bg-gray-100 px-4 py-2 rounded-lg hover:bg-blue-100 transition text-black font-medium text-sm text-left"
+                                    >
+                                        {sugg.text}
+                                    </button>
+
+                                    {/* Rating Section */}
+                                    {ratings[i] ? (
+                                        <div
+                                            className={`text-sm font-semibold whitespace-nowrap ${ratings[i].color === "green"
+                                                ? "text-green-600"
+                                                : "text-red-600"
+                                                }`}
+                                        >
+                                            Rated: {ratings[i].value}
+                                        </div>
+                                    ) : (
+                                        <div className="flex items-center gap-3 whitespace-nowrap">
+                                            {/* Thumbs */}
+                                            <button
+                                                onClick={() => setShowScoreFor({ index: i, color: "green" })}
+                                                className="text-green-600 hover:text-green-800 text-xl"
+                                            >
+                                                👍
+                                            </button>
+
+                                            <button
+                                                onClick={() => setShowScoreFor({ index: i, color: "red" })}
+                                                className="text-red-600 hover:text-red-800 text-xl"
+                                            >
+                                                👎
+                                            </button>
+
+                                            {/* Score buttons */}
+                                            {showScoreFor.index === i && (
+                                                <div className="flex gap-2">
+                                                    {[1, 2, 3].map((score) => (
+                                                        <button
+                                                            key={score}
+                                                            onClick={() => rateSuggestion(i, score)}
+                                                            className={`px-2 py-1 rounded-lg transition text-xs ${showScoreFor.color === "green"
+                                                                ? "bg-green-500 text-white hover:bg-green-600"
+                                                                : "bg-red-500 text-white hover:bg-red-600"
+                                                                }`}
+                                                        >
+                                                            {score}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
                     <div ref={bottomRef} />
                 </div>
 
@@ -217,8 +294,8 @@ export default function ChatPage() {
                     </div>
                 </div>
 
-            </div>
-        </div>
+            </div >
+        </div >
 
     );
 }
