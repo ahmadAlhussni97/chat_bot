@@ -21,7 +21,7 @@ export default function ChatPage() {
 
     const [input, setInput] = useState("");
     const [streaming, setStreaming] = useState(false);
-    const [showSuggestions, setShowSuggestions] = useState(false);
+    const [showSuggestions, setShowSuggestions] = useState<{ [key: string]: boolean }>({[user_1]: false, [user_2]: false});
     const [suggestions, setSuggestions] = useState(
         initialSuggestions.map((text, i) => ({
             _id: String(i + 1),
@@ -49,7 +49,7 @@ export default function ChatPage() {
         if (!prompt.trim() || streaming) return;
 
         setInput("");
-        setShowSuggestions(false);
+        setShowSuggestions((prev) => ({ ...prev, [selectedUser]: false }));
 
         const userMessage: Message = { role: "user", content: prompt };
 
@@ -104,7 +104,7 @@ export default function ChatPage() {
         }
 
         setStreaming(false);
-        setShowSuggestions(true);
+        setShowSuggestions((prev) => ({ ...prev, [selectedUser]: true }));
     };
 
     const rateSuggestion = async (index: number, rating: number) => {
@@ -201,7 +201,7 @@ export default function ChatPage() {
                     ))}
 
                     {/* FOLLOW-UP SUGGESTIONS */}
-                    {showSuggestions && suggestions.length > 0 && (
+                    {showSuggestions[selectedUser] && suggestions.length > 0 && (
                         <div className="flex flex-col gap-1 mt-4">
                             {suggestions.map((sugg, i) => (
                                 <div
