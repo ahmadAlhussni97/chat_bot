@@ -21,14 +21,14 @@ export default function ChatPage() {
 
     const [input, setInput] = useState("");
     const [streaming, setStreaming] = useState(false);
-    const [showSuggestions, setShowSuggestions] = useState<{ [key: string]: boolean }>({[user_1]: false, [user_2]: false});
+    const [showSuggestions, setShowSuggestions] = useState<{ [key: string]: boolean }>({ [user_1]: false, [user_2]: false });
     const [suggestions, setSuggestions] = useState(
         initialSuggestions.map((text, i) => ({
             _id: String(i + 1),
             text,
         }))
     );
-    const [ratings, setRatings] = useState<{ [key: number]: { value: number | null; color: string | null } }>({});
+    const [ratings, setRatings] = useState<{ [key: string]: { value: number | null; color: string | null } }>({});
     const [showScoreFor, setShowScoreFor] = useState<{ index: number | null; color: string | null }>({ index: null, color: null });
     const bottomRef = useRef<HTMLDivElement | null>(null);
     const [open, setOpen] = useState(true);
@@ -113,10 +113,10 @@ export default function ChatPage() {
         // store color from showScoreFor before clearing it
         const ratingColor = showScoreFor.color === "green" ? "green" : "red";
 
-        const previousRating = ratings[index];
+        const previousRating = ratings[index + selectedUser] || null;
 
         // Optimistic UI + store color
-        setRatings((prev) => ({ ...prev, [index]: { value: rating, color: ratingColor } }));
+        setRatings((prev) => ({ ...prev, [index + selectedUser]: { value: rating, color: ratingColor } }));
         setShowScoreFor({ index: null, color: null });
 
         try {
@@ -132,7 +132,7 @@ export default function ChatPage() {
             console.error(err);
 
             // rollback
-            setRatings((prev) => ({ ...prev, [index]: previousRating }));
+            setRatings((prev) => ({ ...prev, [index + selectedUser]: previousRating }));
             alert("Failed to submit rating.");
         }
     };
@@ -217,14 +217,14 @@ export default function ChatPage() {
                                     </button>
 
                                     {/* Rating Section */}
-                                    {ratings[i] ? (
+                                    {ratings[i + selectedUser] ? (
                                         <div
-                                            className={`text-sm font-semibold whitespace-nowrap ${ratings[i].color === "green"
+                                            className={`text-sm font-semibold whitespace-nowrap ${ratings[i + selectedUser].color === "green"
                                                 ? "text-green-600"
                                                 : "text-red-600"
                                                 }`}
                                         >
-                                            Rated: {ratings[i].value}
+                                            Rated: {ratings[i + selectedUser].value}
                                         </div>
                                     ) : (
                                         <div className="flex items-center gap-3 whitespace-nowrap">
