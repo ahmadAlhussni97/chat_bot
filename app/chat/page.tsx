@@ -2,13 +2,14 @@
 
 import { useState, useRef, useEffect } from "react";
 import { addToQueue, getQueue, removeFromQueue } from "@/lib/offlineQueue";
+import UserSideBar from "./UserSideBar";
+import TopBar from "./TopBar";
 
 type Message = {
     role: "user" | "assistant";
     content: string;
 };
 
-const MOCK_SESSION_ID = "69199e826038bf3e62818834";
 const initialSuggestions = [
     "That’s interesting! Can you share more about what you mean?",
     "Walk me through your thought—what’s the tricky part?",
@@ -17,35 +18,35 @@ const initialSuggestions = [
 
 const user_1 = "69199e826038bf3e62818830";
 const user_2 = "6919dae66079e4b588a99ffc";
+const MOCK_SESSION_ID = "69199e826038bf3e62818834";
 
 export default function ChatPage() {
 
     const [input, setInput] = useState("");
     const [ttft, setTtft] = useState<number | null>(null);
     const [streaming, setStreaming] = useState(false);
+    const bottomRef = useRef<HTMLDivElement | null>(null);
+    const [ratings, setRatings] = useState<{ [key: string]: { value: number | null; color: string | null } }>({});
+    const [showScoreFor, setShowScoreFor] = useState<{ index: number | null; color: string | null }>({ index: null, color: null });
     const [showSuggestions, setShowSuggestions] = useState<{ [key: string]: boolean }>({ [user_1]: false, [user_2]: false });
+    const [selectedUser, setSelectedUser] = useState<string>(user_1);
     const [suggestions, setSuggestions] = useState(
         initialSuggestions.map((text, i) => ({
             _id: String(i + 1),
             text,
         }))
     );
-    const [ratings, setRatings] = useState<{ [key: string]: { value: number | null; color: string | null } }>({});
-    const [showScoreFor, setShowScoreFor] = useState<{ index: number | null; color: string | null }>({ index: null, color: null });
-    const bottomRef = useRef<HTMLDivElement | null>(null);
-    const [open, setOpen] = useState(true);
     const [messagesMap, setMessagesMap] = useState<{ [userId: string]: Message[] }>({
         [user_1]: [],
         [user_2]: [],
     });
-    const [selectedUser, setSelectedUser] = useState<string>(user_1);
-
-
+    
     // Scroll to bottom when messages change
     useEffect(() => {
         bottomRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messagesMap, selectedUser]);
 
+    // Retry sending failed ratings from queue
     useEffect(() => {
         const interval = setInterval(async () => {
             if (!navigator.onLine) return;
@@ -70,7 +71,6 @@ export default function ChatPage() {
 
         return () => clearInterval(interval);
     }, []);
-
 
     const sendMessage = async (text?: string) => {
         const prompt = text ?? input;
@@ -134,7 +134,7 @@ export default function ChatPage() {
             });
         }
 
-        setTtft(firstTokenTime ? firstTokenTime - start : 0);   
+        setTtft(firstTokenTime ? firstTokenTime - start : 0);
 
         setStreaming(false);
         setShowSuggestions((prev) => ({ ...prev, [selectedUser]: true }));
@@ -172,58 +172,16 @@ export default function ChatPage() {
         }
     };
 
-
     return (
         <div className="flex h-screen bg-white">
 
             {/* Sidebar */}
-            <div className="w-1/4 bg-gray-100 border-r p-4 overflow-y-auto">
-                <h2 className="text-xl text-black font-bold mb-4">Users</h2>
-
-                {/* Users List */}
-                <div>
-                    <button
-                        onClick={() => setOpen(!open)}
-                        className="w-full flex items-center justify-between p-3 text-black border font-semibold rounded-lg"
-                    >
-                        <span>User Conversations</span>
-                        <span>{open ? "▲" : "▼"}</span>
-                    </button>
-
-                    <div className={`overflow-hidden transition-all duration-300 ${open ? "max-h-40 mt-3" : "max-h-0"}`}>
-                        <div className="space-y-3">
-                            <button
-                                onClick={() => setSelectedUser(user_1)}
-                                className={`w-full flex p-3 rounded-lg border text-left transition ${selectedUser === user_1 ? "bg-[#004a9e] text-white" : "bg-white text-black hover:bg-[#004a9e] hover:text-white"}`}
-                            >
-                                <img src="/user_1.png" alt="User 1" className="w-6 h-6 rounded-full mr-2" />
-                                user_1
-                            </button>
-
-                            <button
-                                onClick={() => setSelectedUser(user_2)}
-                                className={`w-full flex p-3 rounded-lg border text-left transition ${selectedUser === user_2 ? "bg-[#004a9e] text-white" : "bg-white text-black hover:bg-[#004a9e] hover:text-white"}`}
-                            >
-                                <img src="/user_2.svg" alt="User 2" className="w-6 h-6 rounded-full mr-2" />
-                                user_2
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <UserSideBar user_1={user_1} user_2={user_2} selectedUser={selectedUser} setSelectedUser={setSelectedUser} />
 
             {/* Chat Panel */}
             <div className="flex-1 flex flex-col relative">
                 {/* Top Bar */}
-                <div className="p-4 bg-[#004a9e] text-white sticky top-0 z-10 flex justify-between items-center">
-                    <h1 className="text-2xl font-bold">Chat App</h1>
-
-                    {ttft !== null && (
-                        <div className="mt-1 text-md">
-                            <span className="font-semibold">Time to First Token (TTFT):</span> {ttft} ms
-                        </div>
-                    )}
-                </div>
+                <TopBar ttft={ttft} />
 
                 {/* Messages Area */}
                 <div className="flex-1 overflow-y-auto py-[2%] px-[10%] space-y-3">

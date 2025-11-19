@@ -89,7 +89,7 @@ export default async function AnalyticsPage({ searchParams }: { searchParams?: {
 
   return (
     <div className="p-8 space-y-8">
-      <h1 className="text-3xl font-bold">Analytics Dashboard</h1>
+      <h1 className="text-3xl font-bold text-black">Analytics Dashboard</h1>
 
       {/* Filters */}
       <Filters />
