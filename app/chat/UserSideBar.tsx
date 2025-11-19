@@ -12,7 +12,7 @@ const UserSideBar = ({ selectedUser, setSelectedUser }: UserSideBarProps) => {
     const [open, setOpen] = useState(true);
 
     return (
-        <div className="w-1/4 bg-gray-100 border-r p-4 overflow-y-auto">
+        <div className="w-1/4 bg-gray-100 border-r p-4 overflow-y-auto hidden sm:hidden xl:block lg:block md:block">
             <h2 className="text-xl text-black font-bold mb-4">Users</h2>
             <div>
                 <button
