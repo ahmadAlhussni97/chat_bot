@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { addToQueue, getQueue, removeFromQueue } from "@/lib/offlineQueue";
 
 type Message = {
     role: "user" | "assistant";
@@ -20,6 +21,7 @@ const user_2 = "6919dae66079e4b588a99ffc";
 export default function ChatPage() {
 
     const [input, setInput] = useState("");
+    const [ttft, setTtft] = useState<number | null>(null);
     const [streaming, setStreaming] = useState(false);
     const [showSuggestions, setShowSuggestions] = useState<{ [key: string]: boolean }>({ [user_1]: false, [user_2]: false });
     const [suggestions, setSuggestions] = useState(
@@ -44,6 +46,32 @@ export default function ChatPage() {
         bottomRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messagesMap, selectedUser]);
 
+    useEffect(() => {
+        const interval = setInterval(async () => {
+            if (!navigator.onLine) return;
+
+            const queue = await getQueue();
+            for (const [key, item] of queue.entries()) {
+                try {
+                    const res = await fetch(`/api/suggestions/${item.suggestionId}/rank`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(item),
+                    });
+                    if (res.ok) {
+                        await removeFromQueue(key + 1); // IndexedDB keys start at 1
+                    }
+                } catch (err) {
+                    // Keep it in queue for next attempt
+                    await addToQueue(item);
+                }
+            }
+        }, 10000); // retry every 5s
+
+        return () => clearInterval(interval);
+    }, []);
+
+
     const sendMessage = async (text?: string) => {
         const prompt = text ?? input;
         if (!prompt.trim() || streaming) return;
@@ -67,6 +95,7 @@ export default function ChatPage() {
             [selectedUser]: [...prev[selectedUser], assistantMsg],
         }));
 
+        const start = Date.now();
         const response = await fetch("/api/chat/stream", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -82,6 +111,7 @@ export default function ChatPage() {
         if (!reader) return;
 
         let assistantText = "";
+        let firstTokenTime: number | null = null;
 
         while (true) {
             const { value, done } = await reader.read();
@@ -92,8 +122,9 @@ export default function ChatPage() {
             chunk = chunk.replace(/\[DONE\]/g, "");
             if (!chunk) continue;
 
-            assistantText += chunk;
+            if (!firstTokenTime) firstTokenTime = Date.now(); // TTFT
 
+            assistantText += chunk;
             assistantMsg = { role: "assistant", content: assistantText };
 
             setMessagesMap((prev) => {
@@ -102,6 +133,8 @@ export default function ChatPage() {
                 return { ...prev, [selectedUser]: arr };
             });
         }
+
+        setTtft(firstTokenTime ? firstTokenTime - start : 0);   
 
         setStreaming(false);
         setShowSuggestions((prev) => ({ ...prev, [selectedUser]: true }));
@@ -134,6 +167,8 @@ export default function ChatPage() {
             // rollback
             setRatings((prev) => ({ ...prev, [index + selectedUser]: previousRating }));
             alert("Failed to submit rating.");
+
+            await addToQueue({ rank: rating });
         }
     };
 
@@ -180,8 +215,14 @@ export default function ChatPage() {
             {/* Chat Panel */}
             <div className="flex-1 flex flex-col relative">
                 {/* Top Bar */}
-                <div className="p-4 bg-[#004a9e] text-white sticky top-0 z-10">
+                <div className="p-4 bg-[#004a9e] text-white sticky top-0 z-10 flex justify-between items-center">
                     <h1 className="text-2xl font-bold">Chat App</h1>
+
+                    {ttft !== null && (
+                        <div className="mt-1 text-md">
+                            <span className="font-semibold">Time to First Token (TTFT):</span> {ttft} ms
+                        </div>
+                    )}
                 </div>
 
                 {/* Messages Area */}

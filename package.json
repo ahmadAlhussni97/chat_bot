@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "chart.js": "^4.5.1",
+    "idb": "^8.0.3",
     "mongoose": "^8.19.4",
     "next": "16.0.3",
     "react": "19.2.0",
