@@ -4,21 +4,13 @@ import { useState, useRef, useEffect } from "react";
 import { addToQueue, getQueue, removeFromQueue } from "@/lib/offlineQueue";
 import UserSideBar from "./UserSideBar";
 import TopBar from "./TopBar";
+import { user_1, user_2, MOCK_SESSION_ID, initialSuggestions } from "@/constants";
 
 type Message = {
     role: "user" | "assistant";
     content: string;
 };
 
-const initialSuggestions = [
-    "That’s interesting! Can you share more about what you mean?",
-    "Walk me through your thought—what’s the tricky part?",
-    "Could you give me more context so I can help better?"
-];
-
-const user_1 = "69199e826038bf3e62818830";
-const user_2 = "6919dae66079e4b588a99ffc";
-const MOCK_SESSION_ID = "69199e826038bf3e62818834";
 
 export default function ChatPage() {
 
@@ -176,7 +168,7 @@ export default function ChatPage() {
         <div className="flex h-screen bg-white">
 
             {/* Sidebar */}
-            <UserSideBar user_1={user_1} user_2={user_2} selectedUser={selectedUser} setSelectedUser={setSelectedUser} />
+            <UserSideBar selectedUser={selectedUser} setSelectedUser={setSelectedUser} />
 
             {/* Chat Panel */}
             <div className="flex-1 flex flex-col relative">

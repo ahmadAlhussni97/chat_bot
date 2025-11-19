@@ -1,15 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import { user_1, user_2 } from "@/constants";
 
 type UserSideBarProps = {
-    user_1: string;
-    user_2: string;
     selectedUser: string;
     setSelectedUser: (userId: string) => void;
 };
 
-const UserSideBar = ({ user_1, user_2, selectedUser, setSelectedUser }: UserSideBarProps) => {
+const UserSideBar = ({ selectedUser, setSelectedUser }: UserSideBarProps) => {
     const [open, setOpen] = useState(true);
 
     return (
