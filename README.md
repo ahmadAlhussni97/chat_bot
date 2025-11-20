@@ -41,4 +41,8 @@ npm install
 npm run seed
 npm run dev
 
+### Url Project
+http://localhost:3000/chat
+http://localhost:3000/analytics
+
 
