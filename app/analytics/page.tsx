@@ -84,7 +84,9 @@ async function getDashboardData(user?: string, range?: string): Promise<Dashboar
 }
 
 export default async function AnalyticsPage({ searchParams }: { searchParams?: { user?: string, range?: string } }) {
-  const { user, range } = searchParams || {};
+
+  const { user, range } =  await searchParams || {};
+
   const data = await getDashboardData(user, range);
 
   return (

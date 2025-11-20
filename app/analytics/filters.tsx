@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { user_1, user_2 } from "@/constants";
 
 export default function Filters() {
   const router = useRouter();
@@ -23,8 +24,8 @@ export default function Filters() {
           className="border text-gray-700 border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
         >
           <option value="">All Users</option>
-          <option value="69199e826038bf3e62818830">user_1</option>
-          <option value="6919dae66079e4b588a99ffc">user_2</option>
+          <option value={user_1}>user_1</option>
+          <option value={user_2}>user_2</option>
         </select>
       </div>
 

@@ -1,5 +1,5 @@
-const user_1 = "69199e826038bf3e62818830";
-const user_2 = "6919dae66079e4b588a99ffc";
+const user_1 = "691f30b94b5379260e19e2db";
+const user_2 = "691f30b94b5379260e19e2dc";
 const MOCK_SESSION_ID = "69199e826038bf3e62818834";
 
 const initialSuggestions = [
