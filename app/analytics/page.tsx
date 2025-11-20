@@ -4,6 +4,7 @@ import LatencyChart from "./charts/LatencyChart";
 import TopTables from "./charts/TopTables";
 import Filters from "./filters";
 import { connectMongo } from "../../lib/mongo";
+import { ObjectId } from "mongodb";
 
 interface DashboardData {
   volume: any;
@@ -18,9 +19,9 @@ async function getDashboardData(user?: string, range?: string): Promise<Dashboar
   const messages = db.collection("messages");
 
   const match: any = {};
-  if (user) match.userId = user;
-  if (range === "24h") match.timestamp = { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) };
-  if (range === "7d") match.timestamp = { $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) };
+  if (user) match.userId = new ObjectId(user);
+  if (range === "24h") match.createdAt = { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) };
+  if (range === "7d") match.createdAt = { $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) };
 
   // Volume
   const volume = await messages.aggregate([
