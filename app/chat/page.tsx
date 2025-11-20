@@ -23,9 +23,9 @@ export default function ChatPage() {
     const [showSuggestions, setShowSuggestions] = useState<{ [key: string]: boolean }>({ [user_1]: false, [user_2]: false });
     const [selectedUser, setSelectedUser] = useState<string>(user_1);
     const [suggestions, setSuggestions] = useState(
-        initialSuggestions.map((text, i) => ({
-            _id: String(i + 1),
-            text,
+        initialSuggestions.map((val) => ({
+            _id: val._id,
+            text: val.text,
         }))
     );
     const [messagesMap, setMessagesMap] = useState<{ [userId: string]: Message[] }>({

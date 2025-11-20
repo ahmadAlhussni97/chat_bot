@@ -13,10 +13,42 @@ interface DashboardData {
   topTables: any;
 }
 
+function computeRange(range?: string) {
+  const now = Date.now();
+
+  if (range === "24h") {
+    return {
+      current: { $gte: new Date(now - 24 * 60 * 60 * 1000) },
+      prev: {
+        $gte: new Date(now - 48 * 60 * 60 * 1000),
+        $lt: new Date(now - 24 * 60 * 60 * 1000)
+      }
+    };
+  }
+
+  if (range === "7d") {
+    return {
+      current: { $gte: new Date(now - 7 * 24 * 60 * 60 * 1000) },
+      prev: {
+        $gte: new Date(now - 14 * 24 * 60 * 60 * 1000),
+        $lt: new Date(now - 7 * 24 * 60 * 60 * 1000)
+      }
+    };
+  }
+
+  return null;
+}
+
+function delta(a?: number, b?: number) {
+  if (a == null || b == null) return null;
+  return ((a - b) / b) * 100; // percentage change
+}
+
 async function getDashboardData(user?: string, range?: string): Promise<DashboardData> {
   const client = await connectMongo();
   const db = client.connection.db;
   const messages = db.collection("messages");
+  const suggestions = db.collection("suggestions");
 
   const match: any = {};
   if (user) match.userId = new ObjectId(user);
@@ -51,13 +83,43 @@ async function getDashboardData(user?: string, range?: string): Promise<Dashboar
   // Top tables
   const topTables = {
     slowest: await messages.find(match).sort({ latency: -1 }).limit(10).toArray(),
-    topSuggestions: await messages.aggregate([
-      { $match: { suggestionClicks: { $exists: true } } },
-      { $unwind: "$suggestionClicks" },
-      { $group: { _id: "$suggestionClicks.text", count: { $sum: 1 } } },
+    topSuggestions: await suggestions.aggregate([
+      { $match: { clicked: { $exists: true } } },
+      { $unwind: "$clicked" },
+      { $group: { _id: "$clicked", count: { $sum: 1 } } },
       { $sort: { count: -1 } },
       { $limit: 10 },
     ]).toArray(),
+  };
+
+  const ranges = computeRange(range);
+  const matchCurrent: any = {};
+  const matchPrevious: any = {};
+
+  if (user) {
+    matchCurrent.userId = new ObjectId(user);
+    matchPrevious.userId = new ObjectId(user);
+  }
+
+  if (ranges) {
+    matchCurrent.createdAt = ranges.current;
+    matchPrevious.createdAt = ranges.prev;
+  }
+
+  const prevLatency = await messages.aggregate([
+    { $match: { ...matchPrevious, latency: { $exists: true } } },
+    {
+      $group: {
+        _id: null,
+        avgLatency: { $avg: "$latency" },
+        avgTTFT: { $avg: "$ttft" }
+      }
+    }
+  ]).toArray();
+
+  const trends = {
+    avgLatencyDelta: delta(latency[0]?.avgLatency, prevLatency[0]?.avgLatency),
+    avgTTFTDelta: delta(latency[0]?.avgTTFT, prevLatency[0]?.avgTTFT),
   };
 
   // Serialize ObjectIds to string
@@ -68,7 +130,7 @@ async function getDashboardData(user?: string, range?: string): Promise<Dashboar
       chats: v.chats.map(String),
     })))),
     latency: JSON.parse(JSON.stringify(latency)),
-    trends: {},
+    trends: trends,
     topTables: JSON.parse(JSON.stringify({
       slowest: topTables.slowest.map(msg => ({
         ...msg,
@@ -86,7 +148,7 @@ async function getDashboardData(user?: string, range?: string): Promise<Dashboar
 
 export default async function AnalyticsPage({ searchParams }: { searchParams?: { user?: string, range?: string } }) {
 
-  const { user, range } =  await searchParams || {};
+  const { user, range } = await searchParams || {};
 
   const data = await getDashboardData(user, range);
 
