@@ -32,7 +32,7 @@ export default function ChatPage() {
         [user_1]: [],
         [user_2]: [],
     });
-    
+
     // Scroll to bottom when messages change
     useEffect(() => {
         bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -203,6 +203,7 @@ export default function ChatPage() {
                                     <button
                                         onClick={() => sendMessage(sugg.text)}
                                         className="flex-1 bg-gray-100 px-4 py-2 rounded-lg hover:bg-blue-100 transition text-black font-medium text-sm text-left"
+                                        style={{ cursor: "pointer" }}
                                     >
                                         {sugg.text}
                                     </button>
@@ -223,6 +224,7 @@ export default function ChatPage() {
                                             <button
                                                 onClick={() => setShowScoreFor({ index: i, color: "green" })}
                                                 className="text-green-600 hover:text-green-800 text-xl"
+                                                style={{ cursor: "pointer" }}
                                             >
                                                 👍
                                             </button>
@@ -230,6 +232,7 @@ export default function ChatPage() {
                                             <button
                                                 onClick={() => setShowScoreFor({ index: i, color: "red" })}
                                                 className="text-red-600 hover:text-red-800 text-xl"
+                                                style={{ cursor: "pointer" }}
                                             >
                                                 👎
                                             </button>
@@ -245,6 +248,7 @@ export default function ChatPage() {
                                                                 ? "bg-green-500 text-white hover:bg-green-600"
                                                                 : "bg-red-500 text-white hover:bg-red-600"
                                                                 }`}
+                                                            style={{ cursor: "pointer" }}
                                                         >
                                                             {score}
                                                         </button>
