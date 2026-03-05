@@ -4,11 +4,11 @@ import { Suggestion } from "@/models/Suggestion";
 
 export async function GET(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   await connectMongo();
 
-  const sessionId = params.id;
+   const { id: sessionId } = await params;
 
   // Fetch session's messages
   const messages = await Message.find({ sessionId })
@@ -25,7 +25,7 @@ export async function GET(
     return map;
   }, {} as Record<string, any[]>);
 
-  const result = messages.map((msg) => ({
+  const result = messages.map((msg: any) => ({
     ...msg,
     suggestions: suggestionsMap[msg._id] || [],
   }));

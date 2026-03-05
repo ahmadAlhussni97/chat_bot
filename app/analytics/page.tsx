@@ -47,8 +47,8 @@ function delta(a?: number, b?: number) {
 async function getDashboardData(user?: string, range?: string): Promise<DashboardData> {
   const client = await connectMongo();
   const db = client.connection.db;
-  const messages = db.collection("messages");
-  const suggestions = db.collection("suggestions");
+  const messages = db?.collection("messages");
+  const suggestions = db?.collection("suggestions");
 
   const match: any = {};
   if (user) match.userId = new ObjectId(user);
@@ -56,7 +56,7 @@ async function getDashboardData(user?: string, range?: string): Promise<Dashboar
   if (range === "7d") match.createdAt = { $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) };
 
   // Volume
-  const volume = await messages.aggregate([
+  const volume = await messages?.aggregate([
     { $match: match },
     {
       $group: {
@@ -68,7 +68,7 @@ async function getDashboardData(user?: string, range?: string): Promise<Dashboar
   ]).toArray();
 
   // Latency
-  const latency = await messages.aggregate([
+  const latency = await messages?.aggregate([
     { $match: { ...match, latency: { $exists: true } } },
     {
       $group: {
@@ -82,8 +82,8 @@ async function getDashboardData(user?: string, range?: string): Promise<Dashboar
 
   // Top tables
   const topTables = {
-    slowest: await messages.find(match).sort({ latency: -1 }).limit(10).toArray(),
-    topSuggestions: await suggestions.aggregate([
+    slowest: await messages?.find(match).sort({ latency: -1 }).limit(10).toArray(),
+    topSuggestions: await suggestions?.aggregate([
       { $match: { clicked: { $exists: true } } },
       { $unwind: "$clicked" },
       { $group: { _id: "$clicked", count: { $sum: 1 } } },
@@ -106,7 +106,7 @@ async function getDashboardData(user?: string, range?: string): Promise<Dashboar
     matchPrevious.createdAt = ranges.prev;
   }
 
-  const prevLatency = await messages.aggregate([
+  const prevLatency = await messages?.aggregate([
     { $match: { ...matchPrevious, latency: { $exists: true } } },
     {
       $group: {
@@ -118,13 +118,13 @@ async function getDashboardData(user?: string, range?: string): Promise<Dashboar
   ]).toArray();
 
   const trends = {
-    avgLatencyDelta: delta(latency[0]?.avgLatency, prevLatency[0]?.avgLatency),
-    avgTTFTDelta: delta(latency[0]?.avgTTFT, prevLatency[0]?.avgTTFT),
+    avgLatencyDelta: latency?.length && prevLatency?.length ? delta(latency[0]?.avgLatency, prevLatency[0]?.avgLatency) : '',
+    avgTTFTDelta: latency?.length && prevLatency?.length ? delta(latency[0]?.avgTTFT, prevLatency[0]?.avgTTFT) : '',
   };
 
   // Serialize ObjectIds to string
   return {
-    volume: JSON.parse(JSON.stringify(volume.map(v => ({
+    volume: JSON.parse(JSON.stringify(volume?.map(v => ({
       _id: String(v._id),
       messages: v.messages,
       chats: v.chats.map(String),
@@ -132,17 +132,17 @@ async function getDashboardData(user?: string, range?: string): Promise<Dashboar
     latency: JSON.parse(JSON.stringify(latency)),
     trends: trends,
     topTables: JSON.parse(JSON.stringify({
-      slowest: topTables.slowest.map(msg => ({
+      slowest: (topTables.slowest ?? []).map(msg => ({
         ...msg,
         _id: String(msg._id),
         userId: msg.userId,
         chatId: msg.chatId,
       })),
-      topSuggestions: topTables.topSuggestions.map(s => ({
+      topSuggestions: (topTables.topSuggestions ?? []).map(s => ({
         ...s,
         _id: String(s._id),
       })),
-    })),
+    }))
   };
 }
 

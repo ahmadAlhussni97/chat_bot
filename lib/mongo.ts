@@ -1,5 +1,12 @@
 import mongoose from "mongoose";
 
+declare global {
+  var _mongo: {
+    conn: typeof mongoose | null;
+    promise: Promise<typeof mongoose> | null;
+  } | undefined;
+}
+
 const MONGO_URI = process.env.MONGO_URI || "mongodb://localhost:27017/local_ai_chat";
 
 let cached = globalThis._mongo as { conn: typeof mongoose | null; promise: Promise<typeof mongoose> | null } | undefined;

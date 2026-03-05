@@ -22,7 +22,7 @@ export default function LatencyChart({ data }: LatencyChartProps) {
   if (!data || data.length === 0) return <div>No latency data</div>;
 
   const chartData = {
-    labels: data.map((_, i) => `Message ${i + 1}`),
+    labels: data.map((_: any, i:number) => `Message ${i + 1}`),
     datasets: [
       {
         label: "Average Latency (ms)",
