@@ -7,7 +7,7 @@ declare global {
   } | undefined;
 }
 
-const MONGO_URI = process.env.MONGO_URI || "mongodb://localhost:27017/local_ai_chat";
+const MONGO_URI = process.env.MONGO_URI || "mongodb+srv://privateworkweb_db_user:s9pKSL7ERlhwmOCY@cluster0.t7lqknw.mongodb.net/?appName=Cluster0";
 
 let cached = globalThis._mongo as { conn: typeof mongoose | null; promise: Promise<typeof mongoose> | null } | undefined;
 
