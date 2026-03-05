@@ -3,7 +3,6 @@ import { connectMongo } from "@/lib/mongo";
 import { Message } from "@/models/Message";
 
 export const runtime = "nodejs";
-
 export async function POST(req: NextRequest) {
 
     await connectMongo();
